@@ -1,1 +1,66 @@
+name: Folder Seed Tree
 
+on:
+  workflow_dispatch:
+
+jobs:
+  create-structure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create folder structure
+        run: |
+          # 01 Manualy a procesy
+          mkdir -p 01-manualy-a-procesy/onboarding
+          mkdir -p 01-manualy-a-procesy/rozhodnuti
+          mkdir -p 01-manualy-a-procesy/best-practices
+          touch 01-manualy-a-procesy/kultura-a-vize.md
+
+          # 02 Projekty
+          mkdir -p 02-projekty/aktivni
+          mkdir -p 02-projekty/dokoncene
+          mkdir -p 02-projekty/sablony
+
+          # 03 Provoz
+          mkdir -p 03-provoz/meeting-minutes
+          mkdir -p 03-provoz/operativa
+
+          # 04 Majetek
+          mkdir -p 04-majetek/hmotny
+          mkdir -p 04-majetek/nehmotny
+
+          # 05 Finance
+          mkdir -p 05-finance/prijate
+          mkdir -p 05-finance/vydane
+          mkdir -p 05-finance/reporty
+          mkdir -p 05-finance/smlouvy
+
+          # Ostatní hlavní složky
+          mkdir -p 06-pravni
+          mkdir -p 07-marketing
+          mkdir -p 08-archiv
+
+          find . -type d -not -path '*/.*' -empty -exec touch {}/.gitkeep \;
+
+      - name: Verify structure
+        run: |
+          echo "### Výsledný strom složek:"
+          ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/  /'
+
+      - name: Commit and push folder structure
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          
+          git checkout -B strom-souboru
+          
+          git add .
+          git commit -m "chore: setup kebab-case structure from diagram" || echo "Nothing to commit"
+          git push -u origin strom-souboru
